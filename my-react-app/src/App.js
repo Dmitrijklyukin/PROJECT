@@ -55,7 +55,7 @@ export const App = () => {
 										styles["steps-item"] +
 										(activeIndex === index
 											? " " + styles.active
-											: activeIndex > item
+											: activeIndex > index
 											? " " + styles.done
 											: "")
 									}
