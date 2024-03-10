@@ -1,79 +1,101 @@
-import styles from "./styles/App.module.css";
+import styles from "./app.module.css";
+import data from "./data.json";
 import { useState } from "react";
 
 export const App = () => {
-	const [value, setValue] = useState("");
-	const [list, setList] = useState([]);
-	const [error, setError] = useState("");
-	const [isValueVaild, setIsValueVaild] = useState(true);
+	// Можно задать 2 состояния — steps и activeIndex
+	const [steps, setSteps] = useState(data);
+	const [activeIndex, setActiveIndex] = useState(0);
 
-	const onInputButtonClick = () => {
-		const promptValue = prompt("Введите значение:");
-
-		if (promptValue.length >= 3) {
-			setValue(promptValue);
-			setError("");
-			setIsValueVaild(true);
-		} else {
-			setError("Введенное значение должно содержать минимум 3 символа");
-			if (value.lengt < 3) {
-				setIsValueVaild(false);
-			}
+	// И определить 3 обработчика: Клик назад, Клик вперед, Начать сначала
+	const buttonClickBack = () => {
+		if (activeIndex > 0) {
+			setActiveIndex(activeIndex - 1);
 		}
 	};
-
-	const onAddButtonClick = () => {
-		if (isValueVaild) {
-			setList([...list, { id: Date.now(), value: value }]);
-			setError("");
-			setValue("");
-			setIsValueVaild(false);
+	const buttonClickForward = () => {
+		if (activeIndex < 6) {
+			setActiveIndex(activeIndex + 1);
 		}
 	};
+	const buttonClickAllFirst = () => {
+		setActiveIndex(0);
+	};
+	// И 2 переменных-флага — находимся ли мы на первом шаге, и находимся ли на последнем
+	let isFirstStep = true;
+	let isLastStep = false;
 
+	if (activeIndex === 0) {
+		isFirstStep = true;
+	} else if (activeIndex === 6) {
+		isFirstStep = false;
+		isLastStep = true;
+	} else {
+		isFirstStep = false;
+	}
 	return (
-		<div>
-			<div className={styles["app"]}>
-				<h1 className={styles["page-heading"]}>Ввод значения</h1>
-				<p className={styles["no-margin-text"]}>
-					Текущее значение <code>value</code>: "
-					<output className={styles["current-value"]}>{value}</output>
-					"
-				</p>
-				{error !== "" && <div className={styles["error"]}>{error}</div>}
-				<div className={styles["buttons-container"]}>
-					<button
-						className={styles["button"]}
-						onClick={onInputButtonClick}
-					>
-						Ввести новое
-					</button>
-					<button
-						className={styles["button"]}
-						disabled={!isValueVaild}
-						onClick={onAddButtonClick}
-					>
-						Добавить в список
-					</button>
-				</div>
-				<div className={styles["list-container"]}>
-					<h2 className={styles["list-heading"]}>Список:</h2>
-					{list.length ? (
-						<ul className={styles["list"]}>
-							{list.map((item) => (
+		<div className={styles.container}>
+			<div className={styles.card}>
+				<h1>Инструкция по готовке пельменей</h1>
+				<div className={styles.steps}>
+					<div className={styles["steps-content"]}>
+						{steps.map((item, index) => {
+							return (
+								index === activeIndex && (
+									<p key={item.id}>{item.content}</p>
+								)
+							);
+						})}
+					</div>
+					<ul className={styles["steps-list"]}>
+						{steps.map((item, index) => {
+							return (
 								<li
-									className={styles["list-item"]}
+									className={
+										styles["steps-item"] +
+										(activeIndex === index
+											? " " + styles.active
+											: activeIndex > item
+											? " " + styles.done
+											: "")
+									}
 									key={item.id}
 								>
-									{item.value}
+									<button
+										className={styles["steps-item-button"]}
+										onClick={() => setActiveIndex(index)}
+									>
+										{parseInt(item.id)}
+									</button>
+									{item.title}
 								</li>
-							))}
-						</ul>
-					) : (
-						<p className={styles["no-margin-text"]}>
-							Нет добавленных элементов
-						</p>
-					)}
+							);
+						})}
+					</ul>
+					<div className={styles["buttons-container"]}>
+						<button
+							className={styles.button}
+							onClick={buttonClickBack}
+							disabled={isFirstStep}
+						>
+							Назад
+						</button>
+						<button
+							className={styles.button}
+							onClick={buttonClickForward}
+							disabled={isLastStep}
+						>
+							Далее
+						</button>
+						{isLastStep && (
+							<button
+								className={styles.button}
+								onClick={buttonClickAllFirst}
+							>
+								Начать сначала
+							</button>
+						)}
+					</div>
 				</div>
 			</div>
 		</div>
